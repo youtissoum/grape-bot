@@ -10,6 +10,7 @@ import json
 from calculator.main import calculate_
 from cmmmPreviewer.CodePreviewer import parse_any, preview_level
 from PIL import Image
+from TOKEN import token
 
 value = "empty"
 status = cycle(['the dev suffering', 'everybody else losing the competition'])
@@ -200,4 +201,4 @@ async def preview(ctx: discord.Message, level: str):
 # OTHER #
 #########
 
-client.run(config.token)
+client.run(token)
