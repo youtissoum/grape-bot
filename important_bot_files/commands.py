@@ -190,8 +190,8 @@ class Commands_executor(commands.Cog):
         view = View(timeout=None)
 
         closeButton = Button(label="Close", style=discord.ButtonStyle.danger)
-        async def button_callback(interaction: discord.Interaction) {
-        }
+        async def button_callback(interaction: discord.Interaction):
+            pass
         closeButton.callback = button_callback()
 
         await channel.send(embed=ticket_embed)
