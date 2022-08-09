@@ -1,3 +1,4 @@
+import asyncio
 import io
 import discord
 from discord.ext import commands, tasks
@@ -5,7 +6,7 @@ from discord.ui import View, Button
 import config
 import time
 from itertools import cycle
-from important_bot_files.views import HelpView
+from important_bot_files.views import DuelView, HelpView
 import json
 from calculator.main import calculate_
 from cmmmPreviewer.CodePreviewer import parse_any, preview_level
@@ -144,6 +145,68 @@ async def set(ctx, parameter: bool):
         else:
             await ctx.channel.send("the argument must be yes or no")
         json.dump(data, f)
+
+rockpaperscisors = client.create_group("rock_paper_scissors", "play this game", guild_ids=test_servers)
+
+@rockpaperscisors.command(description="Duel someone with rock paper scissors")
+async def duel(ctx: discord.Message, user: discord.User):
+    if user == ctx.author:
+        await ctx.respond("you cannot duel yourself")
+        return
+
+    duel_data = {"battler": ctx.author.id, "victim": user.id}
+    data = []
+    with open('duels.json', 'r') as f:
+        data: list = json.loads(f.read())
+
+    if not duel_data in data:
+        data.append(duel_data)
+        with open('duels.json', 'w') as f:
+            f.write(json.dumps(data))
+
+        await ctx.respond(f'{user.mention}, {ctx.author.display_name} is asking you for a duel, use "/rock_paper_scissors accept" to accept (expires after 30 seconds)')
+
+        await asyncio.sleep(30)
+
+        new_data = []
+        with open('duels.json', 'r') as f:
+            new_data: list = json.loads(f.read())
+
+        try:
+            new_data.remove(duel_data)
+
+            with open('duels.json', 'w') as f:
+                f.write(json.dumps(new_data))
+        except:
+            pass
+    else:
+        await ctx.respond("you have already asked this person on a duel")
+
+@rockpaperscisors.command(description="Accept a duel")
+async def accept(ctx: discord.Message, dueler: discord.User):
+    battles = []
+
+    with open('duels.json', 'r') as f:
+        battles: list = json.loads(f.read())
+
+    found = False
+
+    for battle in battles:
+        if battle == {"battler": dueler.id, "victim": ctx.author.id}:
+            battles.remove(battle)
+            with open('duels.json', 'w') as f:
+                f.write(json.dumps(battles))
+            await ctx.respond(f"{dueler.mention}, the duel has been accepted")
+
+            duel_view = DuelView(dueler, ctx.author)
+            message = await ctx.channel.send("Vote")
+            await duel_view.init(message)
+
+            found = True
+            break
+
+    if found == False:
+        await ctx.respond("no duel has been found")
 
 @client.command(brief="send a message for the next user to see")
 async def message(ctx, *, message):

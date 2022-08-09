@@ -34,3 +34,64 @@ class HelpView(View):
         self.abt_btn.disabled = True
         self.commands_btn.disabled = True
         await self.message.edit(view=self)
+
+class DuelView(View):
+    message = None
+    battler: discord.User = None
+    victim: discord.User = None
+
+    battler_has_voted = False
+    victim_has_voted = False
+
+    battler_vote = None
+    victim_vote = None
+
+    def __init__(self, battler, victim, timeout=120):
+        super().__init__(timeout=timeout)
+        self.battler = battler
+        self.victim = victim
+
+    async def init(self, message):
+        self.message = message
+        self.rock_btn.callback = self.rock_btn_callback
+        self.paper_btn.callback = self.paper_btn_callback
+        self.scissors_btn.callback = self.scissors_btn_callback
+        self.add_item(self.rock_btn)
+        self.add_item(self.paper_btn)
+        self.add_item(self.scissors_btn)
+        await message.edit(view=self)
+
+    async def on_vote(self, vote: str, interaction: discord.Interaction):
+        if interaction.user == self.battler:
+            self.battler_has_voted = True
+            self.battler_vote = vote
+            await interaction.channel.send(f"{interaction.user.display_name} has voted")
+
+        if interaction.user == self.victim:
+            self.victim_has_voted = True
+            self.victim_vote = vote
+            await interaction.channel.send(f"{interaction.user.display_name} has voted")
+
+        if self.battler_has_voted == True and self.victim_has_voted == True:
+            if self.battler_vote == self.victim_vote:
+                await interaction.response.send_message(f"draw !")
+            elif self.battler_vote == "rock" and self.victim_vote == "scissors" or \
+                self.battler_vote == "paper" and self.victim_vote == "rock" or \
+                self.battler_vote == "scissors" and self.victim_vote == "paper":
+                await interaction.response.send_message(f"{self.battler_vote}({self.battler.display_name}) wins against {self.victim_vote}({self.victim.display_name})")
+            elif self.victim_vote == "rock" and self.battler_vote == "scissors" or \
+                self.victim_vote == "paper" and self.battler_vote == "rock" or \
+                self.victim_vote == "scissors" and self.battler_vote == "paper":
+                await interaction.response.send_message(f"{self.victim_vote}({self.victim.display_name}) wins against {self.battler_vote}({self.battler.display_name})")
+
+    rock_btn = Button(label="Rock", style=discord.ButtonStyle.primary, custom_id="rock_btn")
+    async def rock_btn_callback(self, interaction: discord.Interaction):
+        await self.on_vote("rock", interaction)
+
+    paper_btn = Button(label="Paper", style=discord.ButtonStyle.primary, custom_id="paper_btn")
+    async def paper_btn_callback(self, interaction: discord.Interaction):
+        await self.on_vote("paper", interaction)
+
+    scissors_btn = Button(label="Scissors", style=discord.ButtonStyle.primary, custom_id="scissors_btn")
+    async def scissors_btn_callback(self, interaction: discord.Interaction):
+        await self.on_vote("scissors", interaction)
