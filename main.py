@@ -57,7 +57,7 @@ async def on_member_join(member):
 # COMMANDS #
 ############
 
-test_servers = [911372583042162748, 809824925660479539]
+test_servers = [911372583042162748, 809824925660479539, 1012804209982308362]
 
 @client.slash_command(description = "Get help about the bot")
 async def help(ctx: discord.Message):
@@ -134,19 +134,15 @@ async def set(ctx, parameter: bool):
     with open('mimic_table.json', 'r') as f:
         data = json.load(f)
     with open('mimic_table.json', 'w') as f:
-        if parameter == "yes":
-            data[ctx.author.id] = None
+        if parameter == True:
             data[ctx.author.id] = "True"
-            await ctx.channel.send("mimicing set to true")
-        elif parameter == "no":
-            data[ctx.author.id] = None
+            await ctx.respond("mimicing set to true")
+        elif parameter == False:
             data[ctx.author.id] = "False"
-            await ctx.channel.send("mimicing set to false")
-        else:
-            await ctx.channel.send("the argument must be yes or no")
+            await ctx.respond("mimicing set to false")
         json.dump(data, f)
 
-rockpaperscisors = client.create_group("rock_paper_scissors", "play this game", guild_ids=test_servers)
+rockpaperscisors = client.create_group("rock_paper_scissors", "play this game")
 
 @rockpaperscisors.command(description="Duel someone with rock paper scissors")
 async def duel(ctx: discord.Message, user: discord.User):
@@ -177,6 +173,8 @@ async def duel(ctx: discord.Message, user: discord.User):
 
             with open('duels.json', 'w') as f:
                 f.write(json.dumps(new_data))
+
+            await ctx.channel.send("duel expired !")
         except:
             pass
     else:

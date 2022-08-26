@@ -51,7 +51,7 @@ class DuelView(View):
         self.battler = battler
         self.victim = victim
 
-    async def init(self, message):
+    async def init(self, message: discord.Message):
         self.message = message
         self.rock_btn.callback = self.rock_btn_callback
         self.paper_btn.callback = self.paper_btn_callback
@@ -83,6 +83,7 @@ class DuelView(View):
                 self.victim_vote == "paper" and self.battler_vote == "rock" or \
                 self.victim_vote == "scissors" and self.battler_vote == "paper":
                 await interaction.response.send_message(f"{self.victim_vote}({self.victim.display_name}) wins against {self.battler_vote}({self.battler.display_name})")
+            await self.message.delete()
 
     rock_btn = Button(label="Rock", style=discord.ButtonStyle.primary, custom_id="rock_btn")
     async def rock_btn_callback(self, interaction: discord.Interaction):
