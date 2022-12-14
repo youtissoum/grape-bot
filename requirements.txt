@@ -1,0 +1,3 @@
+git+https://github.com/Pycord-Development/pycord
+Pillow==9.2.0
+Python-Machine==1.0.4
