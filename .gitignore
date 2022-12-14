@@ -1,2 +1,4 @@
 old/
 .vscodeignore
+TOKEN.py
+__pycache__
