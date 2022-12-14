@@ -2,10 +2,13 @@ import discord
 from discord.ext import commands, tasks
 from itertools import cycle
 from BotViews import HelpView
-import os
 from TOKEN import token
+import json
 
 client = commands.Bot(command_prefix="$", help_command=None)
+
+with open('bot_data.json', 'r') as f:
+    bot_data = json.loads(f.read())
 
 @client.event
 async def on_ready():
@@ -16,6 +19,11 @@ async def on_ready():
 async def change_status():
     statuses = cycle(['the dev suffering', 'everybody else that lost the competition'])
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=next(statuses)))
+
+@tasks.loop(seconds=30.0)
+async def save_data():
+    with open('bot_data.json', 'w') as f:
+        f.write(json.dumps(bot_data))
 
 testing_servers = [911372583042162748, 809824925660479539, 1012804209982308362]
 
@@ -28,4 +36,9 @@ async def help(ctx: discord.Message):
     message = await ctx.send("_ _", view=view)
     await view.init(message)
 
-client.run(token)
+try:
+    client.run(token)
+except KeyboardInterrupt as e:
+    with open('bot_data.json', 'w') as f:
+        f.write(json.dumps(bot_data))
+    raise KeyboardInterrupt() from e
