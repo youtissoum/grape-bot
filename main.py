@@ -14,6 +14,7 @@ with open('bot_data.json', 'r') as f:
 async def on_ready():
     print(f"{client.user} has been started succesfully !")
     change_status.start()
+    save_data.start()
 
 @tasks.loop(seconds=10.0)
 async def change_status():
@@ -36,9 +37,6 @@ async def help(ctx: discord.Message):
     message = await ctx.send("_ _", view=view)
     await view.init(message)
 
-try:
-    client.run(token)
-except KeyboardInterrupt as e:
-    with open('bot_data.json', 'w') as f:
-        f.write(json.dumps(bot_data))
-    raise KeyboardInterrupt() from e
+client.run(token)
+with open('bot_data.json', 'w') as f:
+    f.write(json.dumps(bot_data))
