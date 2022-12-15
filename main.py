@@ -62,6 +62,19 @@ async def send(ctx: discord.Message, user: discord.Member, message: str):
     else:
         await ctx.respond("either you or the person you are trying to mimic has mimicing disabled", ephemeral=True)
 
+@mimic_group.command(description = "toggle whether other people can mimic you")
+async def toggle(ctx: discord.Message):
+    strid = str(ctx.author.id)
+    if strid not in bot_data['mimicing']:
+        bot_data['mimicing'][strid] = True
+    
+    bot_data['mimicing'][strid] = not bot_data['mimicing'][strid]
+    
+    if bot_data['mimicing'][strid]:
+        await ctx.respond("people can now mimic you!", ephemeral=True)
+    else:
+        await ctx.respond("people can no longer mimic you", ephemeral=True)
+
 client.run(token)
 with open('bot_data.json', 'w') as f:
     f.write(json.dumps(bot_data))
