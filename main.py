@@ -40,6 +40,28 @@ async def help(ctx: discord.Message):
 @client.slash_command(description = "Make the bot say anything you want", test_guilds=testing_servers)
 async def echo(ctx, message: str):
     await ctx.respond(message)
+
+mimic_group = client.create_group("mimic", "tools for mimicing other users", test_guilds=testing_servers)
+
+@mimic_group.command(description = "send a message as a user")
+async def send(ctx: discord.Message, user: discord.Member, message: str):
+    strid = str(ctx.author.id)
+    if strid not in bot_data['mimicing']:
+        bot_data['mimicing'][strid] = True
+
+    vstrid = str(user.id)
+    if vstrid not in bot_data['mimicing']:
+        bot_data['mimicing'][vstrid] = True
+
+    if bot_data['mimicing'][strid] and bot_data['mimicing'][vstrid]:
+        await ctx.respond("success!", ephemeral=True)
+        avatar: bytes = await user.avatar.read()
+        webhook = await ctx.channel.create_webhook(name=user.display_name, reason=f"{ctx.author.display_name} is mimicing {user.display_name}", avatar=avatar)
+        await webhook.send(message)
+        await webhook.delete()
+    else:
+        await ctx.respond("either you or the person you are trying to mimic has mimicing disabled", ephemeral=True)
+
 client.run(token)
 with open('bot_data.json', 'w') as f:
     f.write(json.dumps(bot_data))
